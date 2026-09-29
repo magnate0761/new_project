@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{# ------------------------------------------------------------------ #}
+{# One template serves BOTH "add" and "edit" — app.py just passes     #}
+{# different variables:                                               #}
+{#   title        "Add New Student" / "Edit — Name"                   #}
+{#   student      {} (blank form) / row dict (pre-filled) /           #}
+{#                request.form (re-shown after validation errors)     #}
+{#   submit_label / cancel_url                                        #}
+{# ------------------------------------------------------------------ #}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <h1>{{ title }}</h1>
+</div>
+
+<form class="card form-card" method="post">
+    <div class="form-grid">
+
+        <div class="field">
+            <label for="roll_no">Roll Number <span class="req">*</span></label>
+            <input id="roll_no" name="roll_no"
+                   value="{{ student.get('roll_no', '') or '' }}"
+                   placeholder="e.g. CS2026001">
+        </div>
+
+        <div class="field">
+            <label for="full_name">Full Name <span class="req">*</span></label>
+            <input id="full_name" name="full_name"
+                   value="{{ student.get('full_name', '') or '' }}"
+                   placeholder="e.g. Aarav Sharma">
+        </div>
+
+        <div class="field">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email"
+                   value="{{ student.get('email', '') or '' }}"
+                   placeholder="e.g. aarav@college.edu">
+        </div>
+
+        <div class="field">
+            <label for="phone">Phone <small>(optional)</small></label>
+            <input id="phone" name="phone"
+                   value="{{ student.get('phone', '') or '' }}"
+                   placeholder="e.g. +91 98123 45670">
+        </div>
+
+        <div class="field">
+            <label for="department">Department <span class="req">*</span></label>
+            <select id="department" name="department">
+                <option value="">— choose —</option>
+                {% for d in departments %}
+                    <option value="{{ d }}"
+                            {{ 'selected' if student.get('department') == d }}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="semester">Semester <span class="req">*</span></label>
+            <select id="semester" name="semester">
+                <option value="">— choose —</option>
+                {% for s in semesters %}
+                    <option value="{{ s }}"
+                            {{ 'selected' if student.get('semester') == s or student.get('semester') == s|string }}>Sem {{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="gpa">GPA <small>(0.00 – 10.00, optional)</small></label>
+            <input id="gpa" name="gpa" type="number" step="0.01" min="0" max="10"
+                   value="{{ student.get('gpa', '') if student.get('gpa') is not none else '' }}">
+        </div>
+
+        <div class="field">
+            <label for="date_of_birth">Date of Birth <small>(optional)</small></label>
+            <input id="date_of_birth" name="date_of_birth" type="date"
+                   value="{{ student.get('date_of_birth', '') or '' }}">
+        </div>
+
+        <div class="field">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="Active"
+                    {{ 'selected' if (student.get('status') or 'Active') == 'Active' }}>Active</option>
+                <option value="Inactive"
+                    {{ 'selected' if student.get('status') == 'Inactive' }}>Inactive</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+        <a class="btn" href="{{ cancel_url }}">Cancel</a>
+    </div>
+</form>
+{% endblock %}

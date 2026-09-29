@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Jinja2: the page sets its own title inside a block; this is the default #}
+    <title>{% block title %}Home{% endblock %} · College Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{# ------------------------------------------------------------------ #}
+{# Top navigation bar — appears on every page                         #}
+{# ------------------------------------------------------------------ #}
+<nav class="topnav">
+    <div class="container nav-inner">
+        <a class="brand" href="{{ url_for('dashboard') }}">🎓 College <span>Database</span></a>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}"
+               class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a>
+            <a href="{{ url_for('students') }}"
+               class="{{ 'active' if request.endpoint in ('students', 'student_detail', 'edit_student_page') }}">Students</a>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('add_student_page') }}">+ Add Student</a>
+        </div>
+    </div>
+</nav>
+
+{# ------------------------------------------------------------------ #}
+{# Main content area                                                  #}
+{# ------------------------------------------------------------------ #}
+<main class="container">
+
+    {# Flash messages: little banners that appear once, after a redirect.
+       get_flashed_messages(with_categories=true) yields (category, text). #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {# Each page fills in its own content inside this block #}
+    {% block content %}{% endblock %}
+
+</main>
+
+<footer class="footer">
+    <div class="container">
+        College Database · Flask + SQLite · College Mini Project
+    </div>
+</footer>
+
+</body>
+</html>

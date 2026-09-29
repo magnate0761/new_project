@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# The database file is *data*, not code — never commit it
+students.db
+
+# OS junk
+.DS_Store
+Thumbs.db

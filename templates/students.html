@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{# ------------------------------------------------------------------ #}
+{# Reusable macro: a clickable column header that sorts the table.    #}
+{# Clicking the current column flips asc <-> desc; any other column   #}
+{# starts a fresh ascending sort.  The current filters are kept in    #}
+{# the URL so searching + sorting work together.                       #}
+{# ------------------------------------------------------------------ #}
+{% macro sort_link(col, label) %}
+    {% set new_order = 'desc' if sort_by == col and sort_order == 'asc' else 'asc' %}
+    <a class="{{ 'sorted' if sort_by == col }}"
+       href="{{ url_for('students', search=search, department=department, semester=semester, sort_by=col, sort_order=new_order) }}">
+        {{ label }}
+        {% if sort_by == col %}{{ '▲' if sort_order == 'asc' else '▼' }}{% endif %}
+    </a>
+{% endmacro %}
+
+{% block content %}
+<div class="page-head">
+    <h1>Students <span class="count-badge">{{ students|length }}</span></h1>
+    <div class="spacer"></div>
+    <a class="btn btn-primary" href="{{ url_for('add_student_page') }}">+ Add Student</a>
+</div>
+
+{# ------------------------------------------------------------------ #}
+{# Filter bar — a GET form: submitting it builds a URL like           #}
+{# /students?search=priya&department=Computer+Science&semester=3      #}
+{# and the students() route reads those query parameters.             #}
+{# ------------------------------------------------------------------ #}
+<form class="filter-bar card" method="get" action="{{ url_for('students') }}">
+    <input type="search" name="search" value="{{ search }}"
+           placeholder="Search name, roll no or email…">
+    <select name="department">
+        <option value="">All departments</option>
+        {% for d in departments %}
+            <option value="{{ d }}" {{ 'selected' if d == department }}>{{ d }}</option>
+        {% endfor %}
+    </select>
+    <select name="semester">
+        <option value="">All semesters</option>
+        {% for s in semesters %}
+            <option value="{{ s }}" {{ 'selected' if s == semester }}>Sem {{ s }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    {% if search or department or semester %}
+        <a class="btn" href="{{ url_for('students') }}">Reset</a>
+    {% endif %}
+</form>
+
+{% if students %}
+<section class="card table-card">
+<table class="students-table">
+    <thead>
+        <tr>
+            <th>{{ sort_link('roll_no', 'Roll No') }}</th>
+            <th>{{ sort_link('full_name', 'Name') }}</th>
+            <th>{{ sort_link('department', 'Department') }}</th>
+            <th>{{ sort_link('semester', 'Sem') }}</th>
+            <th>{{ sort_link('gpa', 'GPA') }}</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for s in students %}
+        <tr>
+            <td class="mono">{{ s.roll_no }}</td>
+            <td>
+                <a class="strong" href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.full_name }}</a>
+                <div class="sub">{{ s.email }}</div>
+            </td>
+            <td><span class="badge badge-dept">{{ s.department }}</span></td>
+            <td>Sem {{ s.semester }}</td>
+            <td>{{ "%.2f"|format(s.gpa) if s.gpa is not none else "—" }}</td>
+            <td>
+                <span class="badge {{ 'badge-active' if s.status == 'Active' else 'badge-inactive' }}">
+                    {{ s.status }}
+                </span>
+            </td>
+            <td class="actions">
+                <a class="btn btn-sm" href="{{ url_for('edit_student_page', student_id=s.id) }}">Edit</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</section>
+{% else %}
+<section class="card">
+    <p class="empty">
+        No students found{% if search or department or semester %} matching your filters{% endif %}.
+        {% if search or department or semester %}
+            Try <a href="{{ url_for('students') }}">clearing the filters</a>, or
+        {% endif %}
+        <a href="{{ url_for('add_student_page') }}">add a student</a>.
+    </p>
+</section>
+{% endif %}
+{% endblock %}

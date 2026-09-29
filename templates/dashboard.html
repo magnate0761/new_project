@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <h1>Dashboard</h1>
+    <p>Overview of the student database.</p>
+</div>
+
+{# ---------------- Stat cards ---------------- #}
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active</div>
+        <div class="stat-value">{{ stats.active }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Average GPA</div>
+        {# "%.2f"|format -> always show two decimal places #}
+        <div class="stat-value">{{ "%.2f"|format(stats.avg_gpa) if stats.avg_gpa is not none else "—" }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Top Student</div>
+        <div class="stat-value small">{{ stats.top.full_name if stats.top else "—" }}</div>
+        <div class="stat-sub">
+            {% if stats.top %}{{ "%.2f"|format(stats.top.gpa) }} GPA · {{ stats.top.roll_no }}{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="two-col">
+
+    {# ---------------- Students by department ---------------- #}
+    <section class="card">
+        <h2>Students by Department</h2>
+        {% if stats.departments %}
+        <table>
+            <thead>
+                <tr><th>Department</th><th>Students</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for d in stats.departments %}
+                {% set pct = (d["count"] / stats.max_dept_count * 100) | int if stats.max_dept_count else 0 %}
+                <tr>
+                    <td>{{ d.department }}</td>
+                    <td>{{ d.count }}</td>
+                    <td class="bar-cell"><div class="bar" style="width: {{ pct }}%"></div></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">No students yet. <a href="{{ url_for('add_student_page') }}">Add the first one →</a></p>
+        {% endif %}
+    </section>
+
+    {# ---------------- Recently added students ---------------- #}
+    <section class="card">
+        <h2>Recently Added</h2>
+        {% if stats.recent %}
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Dept</th><th>Sem</th><th>GPA</th></tr>
+            </thead>
+            <tbody>
+            {% for s in stats.recent %}
+                <tr>
+                    <td><a class="strong" href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.full_name }}</a></td>
+                    <td>{{ s.department }}</td>
+                    <td>{{ s.semester }}</td>
+                    <td>{{ "%.2f"|format(s.gpa) if s.gpa is not none else "—" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nothing here yet.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

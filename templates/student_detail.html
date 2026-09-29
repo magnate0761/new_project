@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ s.full_name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('students') }}">← Back to all students</a>
+
+<div class="page-head">
+    <h1>{{ s.full_name }}</h1>
+    <span class="badge {{ 'badge-active' if s.status == 'Active' else 'badge-inactive' }}">
+        {{ s.status }}
+    </span>
+    <div class="spacer"></div>
+    <a class="btn" href="{{ url_for('edit_student_page', student_id=s.id) }}">Edit</a>
+
+    {# Delete is a real POST form (not a link) so it can't fire by accident.
+       confirm() asks for one last click before anything is removed. #}
+    <form method="post" action="{{ url_for('delete_student_page', student_id=s.id) }}"
+          onsubmit="return confirm('Delete {{ s.full_name }}? This cannot be undone.');">
+        <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+</div>
+
+<section class="card detail-card">
+    <div class="detail-grid">
+        <div><span>Roll Number</span><strong class="mono">{{ s.roll_no }}</strong></div>
+        <div><span>Email</span><strong>{{ s.email }}</strong></div>
+        <div><span>Phone</span><strong>{{ s.phone or "—" }}</strong></div>
+        <div><span>Department</span><strong>{{ s.department }}</strong></div>
+        <div><span>Semester</span><strong>Semester {{ s.semester }}</strong></div>
+        <div><span>GPA</span><strong>{{ "%.2f"|format(s.gpa) if s.gpa is not none else "—" }}</strong></div>
+        <div><span>Date of Birth</span><strong>{{ s.date_of_birth or "—" }}</strong></div>
+        <div><span>Record Created</span><strong>{{ s.created_at }}</strong></div>
+    </div>
+</section>
+{% endblock %}
